@@ -337,7 +337,7 @@ python main.py
 
 ---
 
-## 🏆 Bonus
+## Bonus
 
 * Add extra feature (e.g. curtain timer, light color changer)
 * Use decorator to add logging or authentication
