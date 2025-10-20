@@ -362,20 +362,16 @@ python devices/smart_curtains.py
 
 ---
 
-# 🧠 `main.py` — FastAPI Main Web Application
+###  `main.py` — FastAPI Main Web Application
 
 Below is the **full working `main.py` file** for the SmartApp IoT Microservices assignment.  
 This file is responsible for:
 
-- Running the **main dashboard** 🖥️  
-- Communicating with **device microservices** through HTTP 🌐  
-- Using the **Controller** and **Facade** patterns to manage devices 🧭
-
-> 📝 **Important:** Students don’t need to know HTML/CSS deeply. The `index.html` file is already set up — this file just provides the data that will be displayed on the dashboard.
+- Running the **main dashboard**   
+- Communicating with **device microservices** through HTTP   
+- Using the **Controller** and **Facade** patterns to manage devices
 
 ---
-
-`main.py`
 
 ```python
 from fastapi import FastAPI, Request, Form
