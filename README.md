@@ -277,7 +277,7 @@ Visit [http://127.0.0.1:8000](http://127.0.0.1:8000) for dashboard.
 
 ---
 
-##  Step 4: Add New Device — Curtains
+##  Step 4: Add New Device — Curtains (Think here in Creational Patterns Style!)
 
 `devices/smart_curtains.py`:
 
@@ -361,6 +361,98 @@ python devices/smart_curtains.py
 ```
 
 ---
+
+# 🧠 `main.py` — FastAPI Main Web Application
+
+Below is the **full working `main.py` file** for the SmartApp IoT Microservices assignment.  
+This file is responsible for:
+
+- Running the **main dashboard** 🖥️  
+- Communicating with **device microservices** through HTTP 🌐  
+- Using the **Controller** and **Facade** patterns to manage devices 🧭
+
+> 📝 **Important:** Students don’t need to know HTML/CSS deeply. The `index.html` file is already set up — this file just provides the data that will be displayed on the dashboard.
+
+---
+
+`main.py`
+
+```python
+from fastapi import FastAPI, Request, Form
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+from controller.app_controller import AppController
+import uvicorn
+
+# Create FastAPI app
+app = FastAPI(title="SmartApp IoT System")
+
+#  Load HTML templates (for dashboard)
+templates = Jinja2Templates(directory="web/templates")
+
+#  Mount static files (CSS, images, etc.)
+app.mount("/static", StaticFiles(directory="web/static"), name="static")
+
+#  Initialize our main application controller
+controller = AppController()
+
+#  Main dashboard page
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    """
+    Show the main dashboard with all device statuses.
+    """
+    status = controller.get_all_status()
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request, "devices": status}
+    )
+
+#  Toggle Smart Speaker power
+@app.post("/toggle_speaker")
+async def toggle_speaker(request: Request):
+    speaker_status = controller.toggle_speaker()
+    status = controller.get_all_status()
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request, "devices": status, "updated_device": speaker_status}
+    )
+
+#  Toggle Smart Light power
+@app.post("/toggle_light")
+async def toggle_light(request: Request):
+    light_status = controller.toggle_light()
+    status = controller.get_all_status()
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request, "devices": status, "updated_device": light_status}
+    )
+
+#  Set Smart Speaker volume
+@app.post("/set_volume")
+async def set_volume(request: Request, volume: int = Form(...)):
+    controller.set_speaker_volume(volume)
+    status = controller.get_all_status()
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request, "devices": status}
+    )
+
+#  Set Smart Light brightness
+@app.post("/set_brightness")
+async def set_brightness(request: Request, brightness: int = Form(...)):
+    controller.set_light_brightness(brightness)
+    status = controller.get_all_status()
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request, "devices": status}
+    )
+
+#  Entry point
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8000)
+
 
 ##  Step 5: Run All Services
 
