@@ -1,7 +1,7 @@
-```markdown
-# 📝 Full Assignment — SmartApp IoT Microservices Refactor
 
-## 📌 Overview
+# Assignment — SmartApp IoT Microservices Refactor
+
+##  Overview
 
 In this assignment, you will **refactor a SmartApp IoT system into a real microservices architecture**.  
 Each smart device (speaker, light, curtains) will run as its **own FastAPI microservice** on a **separate port**, and a **main web application** will communicate with them through HTTP.
@@ -14,7 +14,7 @@ You will:
 
 ---
 
-## 🧠 Learning Objectives
+##  Learning Objectives
 
 - Understand **microservice architecture** with multiple FastAPI apps  
 - Use **Controller** and **Facade** patterns to decouple logic  
@@ -23,7 +23,7 @@ You will:
 
 ---
 
-## 🏗️ Final Architecture
+##  Final Architecture
 
 ```
 
@@ -44,7 +44,7 @@ Each device exposes:
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 
