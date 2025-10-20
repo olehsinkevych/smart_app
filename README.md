@@ -71,7 +71,7 @@ You **don’t edit** HTML/CSS — only run them.
 
 ---
 
-## 🧰 Step 1: Install Dependencies
+##  Step 1: Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -79,9 +79,9 @@ pip install -r requirements.txt
 
 ---
 
-## 🧠 Step 2: Create Microservices
+##  Step 2: Create Microservices
 
-### 🗣️ Smart Speaker Example
+###  Smart Speaker Example
 
 `devices/smart_speaker.py`:
 
@@ -149,7 +149,7 @@ if __name__ == "__main__":
     speaker.run_server()
 ```
 
-✅ Run the microservice:
+ Run the microservice:
 
 ```bash
 python devices/smart_speaker.py
@@ -159,7 +159,7 @@ Visit [http://127.0.0.1:8001/docs](http://127.0.0.1:8001/docs) to test endpoints
 
 ---
 
-## 💡 Step 3: Create Main Web App
+##  Step 3: Create Main Web App
 
 `main.py`:
 
@@ -192,7 +192,7 @@ if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
 ```
 
-✅ Run:
+ Run:
 
 ```bash
 python main.py
@@ -202,7 +202,7 @@ Visit [http://127.0.0.1:8000](http://127.0.0.1:8000) for dashboard.
 
 ---
 
-## 🧠 Step 4: Add New Device — Curtains
+##  Step 4: Add New Device — Curtains
 
 `devices/smart_curtains.py`:
 
@@ -279,7 +279,7 @@ if __name__ == "__main__":
     curtains.run_server()
 ```
 
-✅ Run in new terminal:
+ Run in new terminal:
 
 ```bash
 python devices/smart_curtains.py
@@ -287,7 +287,7 @@ python devices/smart_curtains.py
 
 ---
 
-## 🧪 Step 5: Run All Services
+##  Step 5: Run All Services
 
 Open **3–4 terminals**:
 
@@ -317,7 +317,7 @@ python main.py
 
 ---
 
-## 🧠 Patterns Used
+##  Patterns Used
 
 | Pattern      | Location                 | Purpose                                    |
 | ------------ | ------------------------ | ------------------------------------------ |
@@ -328,7 +328,7 @@ python main.py
 
 ---
 
-## 📦 Deliverables
+##  Deliverables
 
 * Working **speaker**, **light**, **curtains** microservices
 * Updated **controller** integration
@@ -337,33 +337,19 @@ python main.py
 
 ---
 
-## 🧭 Grading Rubric
-
-| Criteria                           | Points |
-| ---------------------------------- | ------ |
-| Independent microservices run      | 20     |
-| Main app works & dashboard updates | 20     |
-| New device implemented correctly   | 30     |
-| Proper use of patterns             | 20     |
-| Code readability                   | 10     |
-
----
-
-## 🏆 Bonus (5 pts)
+## 🏆 Bonus
 
 * Add extra feature (e.g. curtain timer, light color changer)
 * Use decorator to add logging or authentication
 
 ---
 
-## ✅ Summary
+## Summary
 
 * You now have **multiple FastAPI microservices** communicating with a central app.
 * You applied **Controller** and **Facade** patterns.
 * You extended the system with a **new device**.
 * You didn’t need to touch HTML or CSS at all.
-
-🚀 **You built a mini IoT platform using Python microservices!**
 
 ```
 ```
