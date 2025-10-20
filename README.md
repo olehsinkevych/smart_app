@@ -1,37 +1,63 @@
-# Assignment: Refactor & Extend SmartApp IoT System
+```markdown
+# 📝 Full Assignment — SmartApp IoT Microservices Refactor
 
-## 📌 Objective
+## 📌 Overview
 
-Refactor the existing SmartApp IoT project to follow sound software design principles. You'll improve maintainability, flexibility, and scalability by:
+In this assignment, you will **refactor a SmartApp IoT system into a real microservices architecture**.  
+Each smart device (speaker, light, curtains) will run as its **own FastAPI microservice** on a **separate port**, and a **main web application** will communicate with them through HTTP.
 
-1. **Refactoring to a controller class** (separating logic from UI)
-2. **Implementing design patterns**: Decorator and Facade
-3. **Migrating from a Tkinter GUI to a web-based interface** using **FastAPI** and the **MVT (Model-View-Template)** pattern
-4. **Extending device implementations** to support real attributes and respond to actions
-5. **Refactoring** the SmartApp IoT project to implement a true **microservices** architecture where each device runs as an independent HTTP server with real network endpoints.
+You will:
+- Build independent FastAPI microservices for devices
+- Create a main controller app to communicate with devices
+- Use design patterns (Controller, Facade, Decorator)
+- Extend the system with your own device
 
 ---
 
-##  Part 1: SmartApp System
-├── Main Web Application (FastAPI)
+## 🧠 Learning Objectives
+
+- Understand **microservice architecture** with multiple FastAPI apps  
+- Use **Controller** and **Facade** patterns to decouple logic  
+- Extend functionality without changing core HTML/CSS  
+- Run multiple microservices simultaneously on different ports
+
+---
+
+## 🏗️ Final Architecture
+
+```
+
+SmartApp System
+├── Main Web Application (FastAPI, Port 8000)
 ├── Device Microservices
 │   ├── Smart Speaker (Port 8001)
-│   ├── Smart Light (Port 8002) 
-│   └── Smart Curtains (Port 8003)
+│   ├── Smart Light (Port 8002)
+│   └── Smart Curtains (Port 8003) ← Your extension
 └── Controller & Facade Layer
 
-##   Project Structure
+```
+
+Each device exposes:
+- `/status` → Returns current state  
+- `/power/{state}` → Turns device on/off (or open/close for curtains)  
+- Additional endpoints as needed (e.g., `/volume`, `/brightness`, `/position`)
+
+---
+
+## 📁 Project Structure
+
+```
 
 smartapp-iot/
-├── main.py                 # FastAPI web application
+├── main.py                 # Main FastAPI web app
 ├── controller/
-│   ├── app_controller.py   # Main application controller
-│   └── iot_facade.py       # Facade pattern implementation
+│   ├── app_controller.py   # Business logic
+│   └── iot_facade.py       # Handles HTTP requests to devices
 ├── devices/
-│   ├── base_device.py      # Base device class & decorators
-│   ├── smart_speaker.py    # Speaker device microservice
-│   ├── smart_light.py      # Light device microservice
-│   └── smart_curtains.py   # Curtains device microservice
+│   ├── base_device.py
+│   ├── smart_speaker.py
+│   ├── smart_light.py
+│   └── smart_curtains.py   # ← You will create this
 ├── web/
 │   ├── templates/
 │   │   └── index.html
@@ -39,25 +65,305 @@ smartapp-iot/
 │       └── style.css
 └── requirements.txt
 
-## Part 2: Implementation Tasks
+````
 
-1.1 Base Device Interface
-Create an abstract base class that all devices must implement.
+You **don’t edit** HTML/CSS — only run them.
 
-'''python
-class Device(ABC):
-    @abstractmethod
-    def __init__(self, device_id: str, host: str, port: int):
-        self.device_id = device_id
-        self.host = host
-        self.port = port
-        self.base_url = f"http://{host}:{port}"
-    
-    @abstractmethod
+---
+
+## 🧰 Step 1: Install Dependencies
+
+```bash
+pip install -r requirements.txt
+````
+
+---
+
+## 🧠 Step 2: Create Microservices
+
+### 🗣️ Smart Speaker Example
+
+`devices/smart_speaker.py`:
+
+```python
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import Dict, Any
+import uvicorn
+from devices.base_device import Device
+
+class SpeakerState(BaseModel):
+    is_on: bool = False
+    volume: int = 50
+    playing: bool = False
+    current_track: str = ""
+
+class SmartSpeakerDevice(Device):
+    def __init__(self, device_id: str, host="127.0.0.1", port=8001):
+        super().__init__(device_id, host, port)
+        self.state = SpeakerState()
+        self.app = FastAPI(title=f"Smart Speaker {device_id}")
+        self._setup_routes()
+
+    def _setup_routes(self):
+        app = self.app
+
+        @app.get("/status")
+        async def get_status():
+            return self.get_status()
+
+        @app.post("/power/{state}")
+        async def set_power(state: str):
+            if not self.perform_action("power", state=state):
+                raise HTTPException(status_code=400, detail="Invalid power state")
+            return {"status": "success"}
+
     def get_status(self) -> Dict[str, Any]:
-        pass
-    
-    @abstractmethod
+        return {
+            "device_id": self.device_id,
+            "type": "smart_speaker",
+            "is_on": self.state.is_on,
+            "volume": self.state.volume,
+            "playing": self.state.playing,
+            "current_track": self.state.current_track,
+            "connection": f"{self.host}:{self.port}"
+        }
+
     def perform_action(self, action: str, **kwargs) -> bool:
-        pass
-'''
+        if action == "power":
+            state = kwargs.get("state")
+            if state == "on":
+                self.state.is_on = True
+                return True
+            elif state == "off":
+                self.state.is_on = False
+                self.state.playing = False
+                return True
+        return False
+
+    def run_server(self):
+        uvicorn.run(self.app, host=self.host, port=self.port, log_level="info")
+
+if __name__ == "__main__":
+    speaker = SmartSpeakerDevice("speaker_001")
+    speaker.run_server()
+```
+
+✅ Run the microservice:
+
+```bash
+python devices/smart_speaker.py
+```
+
+Visit [http://127.0.0.1:8001/docs](http://127.0.0.1:8001/docs) to test endpoints.
+
+---
+
+## 💡 Step 3: Create Main Web App
+
+`main.py`:
+
+```python
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+from controller.app_controller import AppController
+import uvicorn
+
+app = FastAPI(title="SmartApp IoT System")
+templates = Jinja2Templates(directory="web/templates")
+app.mount("/static", StaticFiles(directory="web/static"), name="static")
+
+controller = AppController()
+
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    status = controller.get_all_status()
+    return templates.TemplateResponse("index.html", {"request": request, "devices": status})
+
+@app.post("/toggle_speaker")
+async def toggle_speaker(request: Request):
+    controller.toggle_speaker()
+    status = controller.get_all_status()
+    return templates.TemplateResponse("index.html", {"request": request, "devices": status})
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8000)
+```
+
+✅ Run:
+
+```bash
+python main.py
+```
+
+Visit [http://127.0.0.1:8000](http://127.0.0.1:8000) for dashboard.
+
+---
+
+## 🧠 Step 4: Add New Device — Curtains
+
+`devices/smart_curtains.py`:
+
+```python
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import Dict, Any
+import uvicorn
+from devices.base_device import Device
+
+class CurtainState(BaseModel):
+    is_open: bool = False
+    position: int = 0  # 0 = closed, 100 = fully open
+
+class SmartCurtainsDevice(Device):
+    def __init__(self, device_id: str, host="127.0.0.1", port=8003):
+        super().__init__(device_id, host, port)
+        self.state = CurtainState()
+        self.app = FastAPI(title=f"Smart Curtains {device_id}")
+        self._setup_routes()
+
+    def _setup_routes(self):
+        app = self.app
+
+        @app.get("/status")
+        async def get_status():
+            return self.get_status()
+
+        @app.post("/power/{state}")
+        async def set_power(state: str):
+            if not self.perform_action("power", state=state):
+                raise HTTPException(status_code=400, detail="Invalid curtain state")
+            return {"status": "success"}
+
+        @app.post("/position/{value}")
+        async def set_position(value: int):
+            if not self.perform_action("position", value=value):
+                raise HTTPException(status_code=400, detail="Invalid position")
+            return {"status": "success"}
+
+    def get_status(self) -> Dict[str, Any]:
+        return {
+            "device_id": self.device_id,
+            "type": "smart_curtains",
+            "is_open": self.state.is_open,
+            "position": self.state.position,
+            "connection": f"{self.host}:{self.port}"
+        }
+
+    def perform_action(self, action: str, **kwargs) -> bool:
+        if action == "power":
+            state = kwargs.get("state")
+            if state == "open":
+                self.state.is_open = True
+                self.state.position = 100
+                return True
+            elif state == "close":
+                self.state.is_open = False
+                self.state.position = 0
+                return True
+        elif action == "position":
+            value = kwargs.get("value")
+            if 0 <= value <= 100:
+                self.state.position = value
+                self.state.is_open = value > 0
+                return True
+        return False
+
+    def run_server(self):
+        uvicorn.run(self.app, host=self.host, port=self.port, log_level="info")
+
+if __name__ == "__main__":
+    curtains = SmartCurtainsDevice("curtains_001")
+    curtains.run_server()
+```
+
+✅ Run in new terminal:
+
+```bash
+python devices/smart_curtains.py
+```
+
+---
+
+## 🧪 Step 5: Run All Services
+
+Open **3–4 terminals**:
+
+**Terminal 1**
+
+```bash
+python devices/smart_speaker.py
+```
+
+**Terminal 2**
+
+```bash
+python devices/smart_light.py
+```
+
+**Terminal 3**
+
+```bash
+python devices/smart_curtains.py
+```
+
+**Terminal 4**
+
+```bash
+python main.py
+```
+
+---
+
+## 🧠 Patterns Used
+
+| Pattern      | Location                 | Purpose                                    |
+| ------------ | ------------------------ | ------------------------------------------ |
+| Controller   | `AppController`          | Business logic                             |
+| Facade       | `iot_facade.py`          | Abstracts HTTP requests                    |
+| Decorator    | Optional logging wrapper | Add functionality without modifying device |
+| Microservice | Devices directory        | Independent services                       |
+
+---
+
+## 📦 Deliverables
+
+* Working **speaker**, **light**, **curtains** microservices
+* Updated **controller** integration
+* Screenshot of dashboard with all devices visible
+* Short **README** describing your curtain device features
+
+---
+
+## 🧭 Grading Rubric
+
+| Criteria                           | Points |
+| ---------------------------------- | ------ |
+| Independent microservices run      | 20     |
+| Main app works & dashboard updates | 20     |
+| New device implemented correctly   | 30     |
+| Proper use of patterns             | 20     |
+| Code readability                   | 10     |
+
+---
+
+## 🏆 Bonus (5 pts)
+
+* Add extra feature (e.g. curtain timer, light color changer)
+* Use decorator to add logging or authentication
+
+---
+
+## ✅ Summary
+
+* You now have **multiple FastAPI microservices** communicating with a central app.
+* You applied **Controller** and **Facade** patterns.
+* You extended the system with a **new device**.
+* You didn’t need to touch HTML or CSS at all.
+
+🚀 **You built a mini IoT platform using Python microservices!**
+
+```
+```
