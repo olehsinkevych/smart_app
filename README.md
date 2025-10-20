@@ -234,50 +234,7 @@ Visit [http://127.0.0.1:8001/docs](http://127.0.0.1:8001/docs) to test endpoints
 
 ---
 
-##  Step 3: Create Main Web App
-
-`main.py`:
-
-```python
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
-from controller.app_controller import AppController
-import uvicorn
-
-app = FastAPI(title="SmartApp IoT System")
-templates = Jinja2Templates(directory="web/templates")
-app.mount("/static", StaticFiles(directory="web/static"), name="static")
-
-controller = AppController()
-
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    status = controller.get_all_status()
-    return templates.TemplateResponse("index.html", {"request": request, "devices": status})
-
-@app.post("/toggle_speaker")
-async def toggle_speaker(request: Request):
-    controller.toggle_speaker()
-    status = controller.get_all_status()
-    return templates.TemplateResponse("index.html", {"request": request, "devices": status})
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
-```
-
- Run:
-
-```bash
-python main.py
-```
-
-Visit [http://127.0.0.1:8000](http://127.0.0.1:8000) for dashboard.
-
----
-
-##  Step 4: Add New Device — Curtains (Think here in Creational Patterns Style!)
+##  Step 3: Add New Device — Curtains (Think here in Creational Patterns Style!)
 
 `devices/smart_curtains.py`:
 
@@ -361,8 +318,7 @@ python devices/smart_curtains.py
 ```
 
 ---
-
-###  `main.py` — FastAPI Main Web Application
+##  Step 3: `main.py` — FastAPI Main Web Application
 
 Below is the **full working `main.py` file** for the SmartApp IoT Microservices assignment.  
 This file is responsible for:
