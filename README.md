@@ -448,7 +448,7 @@ async def set_brightness(request: Request, brightness: int = Form(...)):
 #  Entry point
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
-
+```
 
 ##  Step 5: Run All Services
 
